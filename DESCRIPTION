@@ -1,0 +1,22 @@
+Package: nonparlongdat
+Title: Nonparametric Estimation for Longitudinal Data Analysis
+Version: 0.0.0.1
+Authors@R:c( 
+    person("Panpan", "Zhang", , "panpan.zhang@vumc.org", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-8211-5930")),
+    person("Dandan", "Liu", , "dandan.liu@vumc.org", role = c("aut"),
+           comment = c(ORCID = "0000-0002-7176-8346")))
+Maintainer: Panpan Zhang <panpan.zhang@vumc.org>
+Description: This package collects a series of nonparametric estimation methods for missing data probelms in longitudinal data analysis.
+Depends: R (>= 2.10)
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Imports: NULL
+LinkingTo: NULL
+URL: https://github.com/liud4/ppcm
+BugReports: https://github.com/liud4/ppcm/issues
+RoxygenNote: 7.3.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
