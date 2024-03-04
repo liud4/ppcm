@@ -16,7 +16,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 
-#' @importFrom dplyr
+#' @importFrom dplyr left_join
 #' @importFrom rms lmr
 NULL
 

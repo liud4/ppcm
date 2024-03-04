@@ -16,7 +16,9 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 
-#' @importFrom dplyr
+#' @importFrom rlang left_join
+#' @importFrom rlang mutate
+#' @importFrom rlang rename
 #' @importFrom utils combn
 NULL
 
