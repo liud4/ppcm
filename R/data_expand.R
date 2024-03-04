@@ -68,7 +68,7 @@ data_expand <- function(data,
   for (current.id in id.list) {
     temp.df <- data[data[, id.var] == current.id, ]
     time.expanded <-
-      data.frame(t(utils::combn(temp.df[, time.var], 2)))
+      data.frame(t(utils::combn(temp.df[[time.var]], 2)))
     colnames(time.expanded) <- c(time.var, "time.end")
     temp.expanded.df <-
       time.expanded %>% dplyr::left_join(temp.df %>% dplyr::select(!outcome.var), by = time.var) %>%

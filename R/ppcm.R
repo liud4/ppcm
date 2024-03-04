@@ -79,7 +79,7 @@ ppcm <- function(data,
     stop("There are variable not selected from the data!")
   }
   
-  if (baseline.only == FALSE) {
+  if (baseline.only == TRUE) {
     method = NULL
     gee.df <- data
     cov.td.bl <- NULL

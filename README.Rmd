@@ -20,3 +20,31 @@ You can install the $\mathtt{ppcm}$ package from GitHub with:
 # install.packages("devtools")
 devtools::install_github("liud4/ppcm")
 ```
+
+## Import Dataset
+
+```{r import_data, warning = FALSE, message = FALSE}
+example.df <- readr::read_csv(system.file("extdata", "example_data.csv", package = "ppcm"))
+head(example.df)
+```
+
+## Implementation
+
+```{r implementation}
+ppcm.fit <- ppcm(
+  data = example.df,
+  id.var = "id",
+  outcome.var = "outcome",
+  time.var = "time",
+  cov.ti = c("X1", "X2"),
+  cov.td = "Z_ij",
+  method = "ppcm",
+  baseline.only = FALSE,
+  fixed.window.length = NULL,
+  int.width = NULL,
+  bandwidth = NULL,
+  width.subset = FALSE
+)
+
+print(ppcm.fit)
+```
