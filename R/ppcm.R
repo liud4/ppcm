@@ -23,8 +23,8 @@ NULL
 ##  ppcm: Predictive Partly Conditional Model
 
 #' Predictive Partly Conditional Model
-#' 
-#' This function
+#'
+#' Function short description
 #'
 #' @param data is a data frame in a long format
 #' @param id.var is the variable name indicating ID or similar
@@ -32,10 +32,18 @@ NULL
 #' @param time.var is the variable name of the follow-up time
 #' @param cov.ti is the list of variable names of the time-independent covariates
 #' @param cov.td is the list of variable names of the time-dependent covariates
-#' @param method allows the users to select between the restricted \code{ppcm} 
+#' @param method allows the users to select between the restricted \code{ppcm}
 #' using fixed time window only and the unrestricted \code{ppcm-u} using all
 #' available data.
-#' 
+#' @param baseline.only is a logistic argument determining whether or not to fit
+#' the model using the baseline covariates only. The default is \code{FALSE}.
+#' @param fixed.window.length is an integer specifying the fixed window lenght if
+#' the \code{ppcm} method is used
+#' @param int.width is the interval width
+#' @param bandwidth is the bandwidth
+#' @param width.subset is a logistic argument that determines whether or not to
+#' subset the analysis data: \code{TRUE}, subsetting the data based on \code{int.width}
+#' and \code{bandwidth}; \code{FALSE}, otherwise.
 #'
 #' @return a list of parameter estimates and standard errors.
 #'
@@ -47,20 +55,23 @@ NULL
 #'
 #' @export
 
-ppcm <- function(data, 
-                 id.var, 
-                 outcome.var, 
+ppcm <- function(data,
+                 id.var,
+                 outcome.var,
                  time.var,
                  cov.ti,
                  cov.td,
                  method = NULL,
-                 baseline.only = FALSE){
-  
+                 baseline.only = FALSE,
+                 fixed.window.length = NULL,
+                 int.width = NULL,
+                 bandwidth = NULL,
+                 width.subset = FALSE) {
   if (!all(c(id.var, time.var, outcome.var, cov.ti, cov.td) %in% names(data))) {
     stop("There are variable not selected from the data!")
   }
   
-  if (baseline.only == FALSE){
+  if (baseline.only == FALSE) {
     method = NULL
     gee.df <- data
     cov.td.bl <- NULL
@@ -77,15 +88,77 @@ ppcm <- function(data,
       cov.td.bl <- c(cov.td.bl, new.var)
     }
     
-    gee.formula <- paste0(outcome.var, '~', paste0(c(time.var, cov.ti, cov.td.bl), collapse = '+'))
+    gee.formula <-
+      paste0(outcome.var, '~', paste0(c(time.var, cov.ti, cov.td.bl), collapse = '+'))
     
-    gee.fit <- rms::lrm(formula = as.formula(gee.formula), data = gee.df, x = TRUE, y = TRUE)
+    gee.fit <-
+      rms::lrm(
+        formula = as.formula(gee.formula),
+        data = gee.df,
+        x = TRUE,
+        y = TRUE
+      )
     
-    gee.est <- stats::coef(gee.fit)[c(time.var, cov.ti, cov.td.bl)]
+    gee.est <- stats::coef(gee.fit)[c(cov.ti, cov.td.bl)]
     
-    gee.se <- sqrt(diag(stats::vcov(gee.fit))[c(time.var, cov.ti, cov.td.bl)])
+    gee.se <-
+      sqrt(diag(stats::vcov(gee.fit))[c(cov.ti, cov.td.bl)])
     
     return(list("est" = gee.est, "se" = gee.se))
+  } else {
+    ppcm.full.df <-
+      data_expand(
+        data,
+        id.var,
+        outcome.var,
+        time.var,
+        cov.ti,
+        cov.td,
+        int.width,
+        bandwidth,
+        width.subset
+      )
+    
+    if (method == "ppcm") {
+      ppcm.df <-
+        ppcm.full.df %>% filter(time.diff == fixed.window.length) %>% as.data.frame()
+      
+      ppcm.formula <-
+        paste0(outcome.var, '~', paste0(c(cov.ti, cov.td, "time.end"), collapse = '+'))
+      
+      ppcm.fit <-
+        rms::lrm(
+          formula = as.formula(ppcm.formula),
+          data = ppcm.df,
+          x = TRUE,
+          y = TRUE
+        )
+      
+      ppcm.est <- stats::coef(ppcm.fit)[c(cov.ti, cov.td)]
+      
+      ppcm.se <-
+        sqrt(diag(stats::vcov(ppcm.fit))[c(cov.ti, cov.td)])
+      
+      return(list("est" = ppcm.est, "se" = ppcm.se))
+    } else if (method == "ppcm_u") {
+      ppcm_u.formula <-
+        paste0(outcome.var, '~', paste0(c(cov.ti, cov.td, "time.end"), collapse = '+'))
+      
+      ppcm_u.fit <-
+        rms::lrm(
+          formula = as.formula(ppcm.formula),
+          data = ppcm.full.df,
+          x = TRUE,
+          y = TRUE
+        )
+      
+      ppcm_u.est <- stats::coef(ppcm_u.fit)[c(cov.ti, cov.td)]
+      
+      ppcm_u.se <-
+        sqrt(diag(stats::vcov(ppcm_u.fit))[c(cov.ti, cov.td)])
+      
+      return(list("est" = ppcm_u.est, "se" = ppcm_u.se))
+    }
   }
   
 }
