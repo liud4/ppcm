@@ -17,8 +17,8 @@ LazyData: true
 Imports: 
     dplyr,
     magrittr,
-    rlang,
-    rms
+    rms,
+    utils
 URL: https://github.com/liud4/ppcm
 BugReports: https://github.com/liud4/ppcm/issues
 RoxygenNote: 7.3.1

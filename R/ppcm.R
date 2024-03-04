@@ -16,8 +16,16 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 
-#' @importFrom dplyr left_join
+#' @importFrom dplyr arrange
+#' @importFrom dplyr filter
+#' @importFrom dplyr first
+#' @importFrom dplyr group_by
+#' @importFrom dplyr mutate_at
+#' @importFrom dplyr ungroup
 #' @importFrom rms lmr
+#' @importFrom stats as.formula
+#' @importFrom stats coef
+#' @importFrom stats vcov
 NULL
 
 ##  ppcm: Predictive Partly Conditional Model
@@ -79,11 +87,11 @@ ppcm <- function(data,
       new.var <- paste0(var.i, "_bl")
       gee.df[new.var] <- gee.df[var.i]
       gee.df <- gee.df %>%
-        arrange(id.var, time.var) %>%
-        group_by(gee.df[id.var]) %>%
-        mutate_at(new.var,
-                  ~ dplyr::first(.)) %>%
-        ungroup() %>%
+        dplyr::arrange(id.var, time.var) %>%
+        dplyr::group_by(gee.df[id.var]) %>%
+        dplyr::mutate_at(new.var,
+                         ~ dplyr::first(.)) %>%
+        dplyr::ungroup() %>%
         as.data.frame()
       cov.td.bl <- c(cov.td.bl, new.var)
     }
@@ -93,7 +101,7 @@ ppcm <- function(data,
     
     gee.fit <-
       rms::lrm(
-        formula = as.formula(gee.formula),
+        formula = stats::as.formula(gee.formula),
         data = gee.df,
         x = TRUE,
         y = TRUE
@@ -121,14 +129,14 @@ ppcm <- function(data,
     
     if (method == "ppcm") {
       ppcm.df <-
-        ppcm.full.df %>% filter(time.diff == fixed.window.length) %>% as.data.frame()
+        ppcm.full.df %>% dplyr::filter(time.diff == fixed.window.length) %>% as.data.frame()
       
       ppcm.formula <-
         paste0(outcome.var, '~', paste0(c(cov.ti, cov.td, "time.end"), collapse = '+'))
       
       ppcm.fit <-
         rms::lrm(
-          formula = as.formula(ppcm.formula),
+          formula = stats::as.formula(ppcm.formula),
           data = ppcm.df,
           x = TRUE,
           y = TRUE
@@ -146,7 +154,7 @@ ppcm <- function(data,
       
       ppcm_u.fit <-
         rms::lrm(
-          formula = as.formula(ppcm.formula),
+          formula = stats::as.formula(ppcm.formula),
           data = ppcm.full.df,
           x = TRUE,
           y = TRUE
@@ -160,5 +168,4 @@ ppcm <- function(data,
       return(list("est" = ppcm_u.est, "se" = ppcm_u.se))
     }
   }
-  
 }

@@ -16,9 +16,11 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 
-#' @importFrom rlang left_join
-#' @importFrom rlang mutate
-#' @importFrom rlang rename
+#' @importFrom dplyr filter
+#' @importFrom dplyr left_join
+#' @importFrom dplyr mutate
+#' @importFrom dplyr rename
+#' @importFrom dplyr select
 #' @importFrom utils combn
 NULL
 
@@ -60,31 +62,32 @@ data_expand <- function(data,
                         bandwidth,
                         width.subset = FALSE) {
   id.list <- unique(data[id.var])
-  id.list <- id.list[1:nrow(id.list), ]
+  id.list <- id.list[1:nrow(id.list),]
   
   expanded.df <- data.frame(NULL)
   for (current.id in id.list) {
-    temp.df <- data[data[, id.var] == current.id,]
-    time.expanded <- data.frame(t(utils::combn(temp.df[, time.var], 2)))
+    temp.df <- data[data[, id.var] == current.id, ]
+    time.expanded <-
+      data.frame(t(utils::combn(temp.df[, time.var], 2)))
     colnames(time.expanded) <- c(time.var, "time.end")
     temp.expanded.df <-
-      time.expanded %>% left_join(temp.df %>% select(!outcome.var), by = time.var) %>%
-      rename("time.start" = time.var) %>%
+      time.expanded %>% dplyr::left_join(temp.df %>% dplyr::select(!outcome.var), by = time.var) %>%
+      dplyr::rename("time.start" = time.var) %>%
       as.data.frame()
     temp.expanded.df <-
-      temp.expanded.df %>% left_join(temp.df %>% select(c(time.var, outcome.var)) %>% rename("time.end" = time.var),
-                                     by = "time.end") %>%
+      temp.expanded.df %>% dplyr::left_join(temp.df %>% dplyr::select(c(time.var, outcome.var)) %>% dplyr::rename("time.end" = time.var),
+                                            by = "time.end") %>%
       as.data.frame()
     expanded.df <- rbind(expanded.df, temp.expanded.df)
   }
   
   expanded.df <- expanded.df %>%
-    mutate(time.diff = time.end - time.start) %>%
+    dplyr::mutate(time.diff = time.end - time.start) %>%
     as.data.frame()
   
   if (width.subset == TRUE) {
-    expanded.df = expanded.df %>% filter(time.diff >= (int.width - bandwidth) &
-                                           time.diff <= (int.width + bandwidth)) %>% as.data.frame()
+    expanded.df = expanded.df %>% dplyr::filter(time.diff >= (int.width - bandwidth) &
+                                                  time.diff <= (int.width + bandwidth)) %>% as.data.frame()
   } else {
     expanded.df = expanded.df
   }
