@@ -61,12 +61,11 @@ data_expand <- function(data,
                         int.width,
                         bandwidth,
                         width.subset = FALSE) {
-  id.list <- unique(data[id.var])
-  id.list <- id.list[1:nrow(id.list),]
+  id.list <- unique(data[[id.var]])
   
   expanded.df <- data.frame(NULL)
   for (current.id in id.list) {
-    temp.df <- data[data[, id.var] == current.id, ]
+    temp.df <- data[data[[id.var]] == current.id, ]
     time.expanded <-
       data.frame(t(utils::combn(temp.df[[time.var]], 2)))
     colnames(time.expanded) <- c(time.var, "time.end")

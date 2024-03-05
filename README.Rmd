@@ -5,6 +5,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
 The $\mathtt{ppcm}$ package aims to provide user-friendly functions to implement 
@@ -31,7 +32,7 @@ head(example.df)
 ## Implementation
 
 ```{r implementation}
-ppcm.fit <- ppcm(
+ppcm.fit <- ppcm::ppcm(
   data = example.df,
   id.var = "id",
   outcome.var = "outcome",
@@ -40,11 +41,15 @@ ppcm.fit <- ppcm(
   cov.td = "Z_ij",
   method = "ppcm",
   baseline.only = FALSE,
-  fixed.window.length = NULL,
+  fixed.window.length = 3,
   int.width = NULL,
   bandwidth = NULL,
   width.subset = FALSE
 )
 
-print(ppcm.fit)
+ppcm.res <- as.data.frame(rbind(round(ppcm.fit$est, digits = 3),
+                  round(ppcm.fit$se, digits = 3)))
+rownames(ppcm.res) <- c("Est.", "S.E.")
+
+ppcm.res %>% knitr::kable(., format = "pipe", padding = 2)
 ```
